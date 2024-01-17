@@ -1,0 +1,182 @@
+body{
+	background-color: #fffef8;
+	max-width: 1440px;
+	max-height: 1024px;
+	margin:auto;
+}
+
+header {
+	max-width: 1440px; 
+	display: flex;
+	justify-content: space-between;
+	padding: 80px ;
+	
+}
+
+h1{
+	display: flex;
+	flex-direction: column;
+	font-family: 'Syne';
+	font-size: 22px;
+	font-weight: 800;
+	line-height: 26.4px;
+	color: #B1663C;
+	width: 213px;
+	height: 26px;
+}
+
+h1 a {
+	text-decoration: none;
+}
+h1 a:visited {
+	text-decoration: none;
+	color: #B1663C;
+}
+
+
+h1 > span {
+	font-family: 'Work Sans';
+	font-size:10px;
+	font-weight: 400;
+	line-height: 11.73px;
+	width: 138px;
+	height: 12px;
+	flex-wrap: nowrap
+}
+/*********Début NavBar*******/
+nav ul {
+	display: flex;
+	align-items: center;
+	list-style-type: none;
+}
+
+nav li {
+	padding: 0 20px;
+	font-size:16px;
+	width: 55px;
+	height: 19px;
+	font-family: 'work sans';
+	font-size: 16px;
+	font-weight: 400;
+}
+
+nav a {
+	text-decoration: none;
+	color:black 
+}
+
+nav a img {
+	width: 22px;
+	height: 22px;
+}
+
+li:hover {
+	color: black;
+	font-weight: bold;
+}
+/*********Fin NavBar*******/
+
+main  {
+	display: flex;
+	justify-content: center;
+	align-items:center ;
+	margin-top: 130px;
+	margin-bottom: 530px;
+}
+
+/*************Formulaire de connexion***************/
+form {
+	margin-top:30px;
+}
+
+h2{
+	margin-bottom: 20px;	font-family: 'Syne';
+	font-weight: 700;
+	font-size: 30px;
+	color: #1D6154;
+	text-align: center;
+}
+
+label {
+	font-family: "Work Sans";
+	font-size: 14px;
+	font-weight: 500;
+	line-height: 16px;
+	text-align: left;
+}
+
+input[type="submit"]{ /* Btn 'Se connecter" */
+	font-family: 'Syne';
+	font-weight: 700;
+	font-size: 14px;
+	color: white;
+	background-color: #1D6154;
+	margin : 2em auto ;
+	width: 179px;
+	height: 36px!important;
+	border-radius: 60px ;
+}
+
+input {
+	border: none;
+	box-shadow: 0px 4px 14px rgba(0, 0, 0, 0.09);
+	display: block;
+	width: 379px;
+	height: 51px;
+	margin: 5px 0;
+}
+#contact input[type="email"] {
+    display: block;
+    margin-bottom: 45px;
+}
+
+
+
+
+/************Lien "mdp oublié"******************/
+#contact a { 
+	display: flex;
+	justify-content: center;
+	font-family: "work sans";
+	font-size: 14px;
+	font-weight: 500;
+	line-height: 16.42px;
+	margin-top: 10px;
+}
+
+#contact a:visited {
+	color: black;
+}
+/**************Fin lien "mdp oublié"****************/
+
+
+#contact p {/* le message d'erreur s'affichera en vert */
+	text-align: center;
+	font-weight: bold;
+	color: #1D6154;
+}
+
+.erreurco { /* l'erreur s'affichera en rouge */
+	color: #b22222;
+}
+
+
+/******************Début footer********************/
+footer{
+	max-width: 1440px;
+	width: 100%;
+	background-color: #ffffff;
+	height: 60px;
+}
+
+footer nav ul {
+	display: flex;
+	justify-content: flex-end;
+	font-family: "Work Sans";
+}
+
+footer a {
+	margin: 20px;
+	font-size: 14px;
+}
+/*******************Fin Footer*********************/
