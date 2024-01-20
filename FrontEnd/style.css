@@ -591,9 +591,26 @@ select{
 	font-family: 'work sans';
 }
 
+.error-container {
+    margin-top: 10px;
+    color: #ff0000; /* Rouge */
+	position: absolute;
+	top: 440px;
+	left: 650px;
+}
+
+.error-container ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.error-container li {
+    margin-bottom: 5px;
+}
 
 @media screen and (max-width: 1440px) {
 	footer {
 	  max-width: 100%;
 	}
   }
+  
