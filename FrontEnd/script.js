@@ -101,7 +101,7 @@ let closeBtn;
 
 const openModal = function (e){  /* utilisé comme gestionnaire d'évènements quand il y au clic sur un élément avec "js-modal" */
     e.preventDefault()           /* empêche un rechargement de la page */
-
+  
     const target = document.querySelector(e.target.getAttribute('href')) /* récupère élément cible du modal grâce à la valeur de l'attribut href */
         if (!target) { /*  vérifie si l'élément ciblé existe */
             console.error('Modal non trouvé.')
@@ -259,13 +259,47 @@ function showAllModalContent() {
     modalCloseSpan.style.display = null
 }
 
+function showCreateForm() {
+    modalForm.style.display = "block";
+    resetForm(); 
+    
+}
+
+function resetForm() { /* réinitialiser le formulaire */
+    console.log('resetForm appelé')
+    const titleInput = document.querySelector("input[name='title']")
+    console.log('titleInput found:', titleInput)
+    
+    setTimeout(() => { /* introduction d'un délai avant d'exévure le code a l'intérieur de la fonction fléchée */
+        console.log('After timeout, titleInput value:', titleValue)
+    }, 1000)
+
+    if (titleInput) {
+        titleInput.value = ''/*Réinitialise la valeur du champ titre*/
+        console.log('After reset, titleInput value:', titleInput.value)
+    }
+}
+
+
 function hideCreateForm() {
+    resetForm()
     modalForm.style.display = "none"
     modalBackBtn.style.display = "none"
     modalCloseBtn.style.display = "none"
     modalTitre.style.display = "none"
     modalButton.style.display = "none"
     modalCloseSpan.style.display = 'none'
+    const modalWrapper = document.querySelector('.modal-wrapper')
+    if (modalWrapper) {
+        modalWrapper.classList.remove('show-modal')
+    }
+    formErrors = [] /*réinitialise les erreurs*/
+    
+    const errorContainer = modalWrapper.querySelector('.error-container')
+    if (errorContainer) {
+        errorContainer.innerHTML = '' /*efface les erreurs dans le conteneur*/
+    }
+    showAllModalContent()
 }
 
 
@@ -278,7 +312,10 @@ let modalTitre;
 let modalButton;
 let modalCategorieSelect
 
+let titleValue
 function createForm(modalWrapper, getCategories) {
+
+
     modalBackBtn = document.createElement("button")/*création btn retour*/
     modalBackBtn.classList.add("js-form-back")
     const modalBackMark = document.createElement("i")
@@ -391,13 +428,32 @@ function createForm(modalWrapper, getCategories) {
     modalButton.type = "submit"
     modalButton.innerText = "Valider"
     modalButton.classList.add("form-btn")
-    modalButton.addEventListener('click', function (e) {
-        const fakeEvent = {
-            preventDefault: function () {},
-            target: document.querySelector('.js-modal'),
+    
+    modalButton.addEventListener('click', async function (e) {
+        e.preventDefault();
+        const titleInput = document.querySelector("input[name='title']");
+         titleValue = titleInput ? titleInput.value : ''
+
+        console.log('Before validateForm');
+    
+        const result = validateForm(titleValue);
+        const errorContainer = modalWrapper.querySelector('.error-container');
+    
+        console.log('After validateForm');
+        console.log('Title input value:', titleValue);
+
+        if (result.isValid) {
+            console.log('Before sendFormData');
+            await sendFormData(e, modalImageInput, modalWrapper);
+            console.log('After sendFormData');
+    
+            hideCreateForm();
+            showAllModalContent();
+            closeModal(e);
+        } else {
+            displayErrors(result.errors, errorContainer);
         }
-        closeModal(fakeEvent)
-    })
+    });
     
     modalImageLabel.appendChild(modalImageIcon); /* tout rattaché au modalWrapper*/
     modalImageLabel.appendChild(modalImageInput);
@@ -418,10 +474,21 @@ function createForm(modalWrapper, getCategories) {
     modalImageInput.addEventListener("change", function (e){ /* vérification taille Img */
         checkSizePhoto(e, modalImageLabel)
     })
+
+    const errorContainer = document.createElement('div');
+    errorContainer.classList.add('error-container');
+    modalWrapper.appendChild(errorContainer);
+
     modalForm.addEventListener("submit", function(e){
+        e.preventDefault();
+        const result = validateForm(); // Appeler la fonction de validation
+        if (result.isValid) {
         sendFormData(e, modalImageInput, modalWrapper) /* envoi les données du Form */
         hideCreateForm()
         showAllModalContent()  
+        }else{
+            displayErrors(result.errors, errorContainer)
+        }
     })
 }
 
@@ -431,16 +498,72 @@ document.addEventListener('DOMContentLoaded', function () {  /* Attend que le DO
 })
 
 
+/********Fonction pour valider le formulaire**********/
+function validateForm(titleValue) {
+    const errors = []
+    const catId = modalCategorieSelect.value
+    console.log('Title input value:', titleValue)
+    console.log('Category ID:', catId)
+
+    if (!titleValue.trim()) {
+        errors.push("Veuillez entrer un titre.")
+    }
+
+    if (!catId) {
+        errors.push("Veuillez sélectionner une catégorie.")
+    }
+
+    console.log('Validation result:', errors)
+    return {
+        isValid: errors.length === 0,
+        errors: errors
+    }
+}
+
+
+/*********************fonction pour gerer les erreurs***************/
+function displayErrors(errors, errorContainer) {/*Efface les erreurs précédentes*/
+    errorContainer.innerHTML = '';
+
+    if (errors.length > 0) {/*Affiche les nouvelles erreurs*/
+        const errorList = document.createElement('ul')
+        errors.forEach(error => {
+            const errorItem = document.createElement('li')
+            errorItem.textContent = error
+            errorList.appendChild(errorItem)
+        })
+        errorContainer.appendChild(errorList)
+        errorContainer.style.display = 'block' /*affiche le conteneur d'erreur*/
+    } else {
+        errorContainer.style.display = 'none' /*cache le conteneur d'erreur s'il est vide*/
+    }
+}
+
+
 /*********************************************Envoi données du formulaire**********************************/
 
 async function sendFormData(e,modalImageInput) {
     e.preventDefault()
+    if (!modalWrapper || !modalImageInput) {
+        console.error("Les éléments nécessaires ne sont pas définis.");
+        return;
+    }
     const apiWorks = "http://localhost:5678/api/works" /* récupère l'url */
     const token = localStorage.getItem('token')        /* récupère le token */
     console.log("le token du form", token)
     const imgResult = modalImageInput.files[0]          /* récup img sélectionnée dans le champ de fichier */
     console.log("l'image result", imgResult)
     let title = document.querySelector("input[name='title']").value /* récup du titre dans le champ de texte */
+    const errorContainer = modalWrapper.querySelector('.error-container');
+    if (!errorContainer) {
+        console.error("Le conteneur d'erreurs n'est pas défini.");
+        return;
+    }
+    if (!title.trim()) {
+        const errorMessage = "Veuillez entrer un titre."
+        displayError(errorMessage, errorContainer)
+        return;
+    }
     const titleInput = document.querySelector("input[name='title']")
     titleInput.addEventListener('change', function() {
         console.log('Titre modifié :', titleInput.value)
@@ -448,27 +571,28 @@ async function sendFormData(e,modalImageInput) {
     })
    
    let catId = modalCategorieSelect.value
-    
+    errorContainer.innerHTML = '';    /*Remise à zéro du contenu du conteneur d'erreur*/
+
     if (modalCategorieSelect.value !== "") {
-        const catId = modalCategorieSelect.value;
+         catId = modalCategorieSelect.value;
         console.log('Catégorie sélectionnée :', catId)
     } else {
         console.log("Aucune catégorie sélectionnée")
     }
    
     if (!imgResult) {
-        alert("Aucun fichier sélectionné")
+        errorContainer.innerHTML = '<p>Veuillez sélectionner un fichier.</p>'
         return
     }
 
       if (!title) {
-        alert("Veuillez entrer un titre")
-        return;  
+        errorContainer.innerHTML = '<p>Veuillez entrer un titre.</p>'
+        return
     }
 
     if (!catId) {
-        alert("Veuillez sélectionner une catégorie")
-        return;
+        errorContainer.innerHTML = '<p>Veuillez sélectionner une catégorie.</p>'
+        return
     } 
     
     const formData = new FormData() /* création objet FormData pour envoyer les données */
@@ -504,7 +628,16 @@ async function sendFormData(e,modalImageInput) {
   }
 
 }
-
+function displayError(message, errorContainer) {/*Efface les erreurs précédentes*/
+    errorContainer.innerHTML = ''
+    /*Affiche la nouvelle erreur*/
+    const errorList = document.createElement('ul')
+    const errorItem = document.createElement('li')
+    errorItem.textContent = message
+    errorList.appendChild(errorItem)
+    errorContainer.appendChild(errorList)
+    errorContainer.style.display = 'block'
+}
 
 /**********************************************Vérification taille photo*****************************************************/
 
